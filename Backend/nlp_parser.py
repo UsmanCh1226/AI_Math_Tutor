@@ -55,8 +55,10 @@ def parse_user_input(user_input):
     subject = classify_subject(user_input)
     expression = extract_expression(user_input)
 
+    step_mode = any(keyword in user_input.lower() for keyword in ["explain", "steps", "step by step", "show work"])
+
     return {
         "subject": subject,
-        "expression": expression
+        "expression": expression,
+        "step_by_step": step_mode
     }
-
