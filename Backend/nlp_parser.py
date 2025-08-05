@@ -51,6 +51,40 @@ NUMBER_WORDS = {
     "eighty": 80, "ninety": 90
 }
 
+FILLER_WORDS = [
+    "what is", "what's", "can you", "please", "solve", "tell me", "find", "show me",
+    "how do i", "how to", "calculate", "evaluate", "simplify", "differentiate", "factor",
+    "expand", "derive", "compute", "step by step", "step-by-step"
+]
+
+STEP_PHRASES = [
+    "step by step", "step-by-step", "in steps", "show steps", "explain steps"
+]
+
+QUIZ_BANK = {
+    "algebra": [
+        {"question": "Solve: 2x + 5 = 13", "answer": "4"},
+        {"question": "What is x if 3x = 12?", "answer": "4"},
+        {"question": "Factor: x² - 9", "answer": "(x - 3)(x + 3)"},
+    ],
+    "calculus": [
+        {"question": "Differentiate: x²", "answer": "2x"},
+        {"question": "What is the derivative of sin(x)?", "answer": "cos(x)"},
+    ]
+}
+
+
+
+def detect_step_by_step(text):
+    return any(phrase in text.lower() for phrase in STEP_PHRASES)
+
+
+def remove_filler_phrases(text):
+    for phrase in FILLER_WORDS:
+        pattern = r'\b' + re.escape(phrase) + r'\b'
+        text = re.sub(pattern, '', text, flags=re.IGNORECASE)
+    return re.sub(r'\s+', ' ', text).strip()
+
 
 
 def word_to_number(text):
@@ -171,6 +205,34 @@ def parse_user_input(user_input):
         "expression": expression,
         "step_by_step": step_mode
     }
+
+
+def suggest_quiz(user_history):
+    subject_counts = {}
+    for item in user_history:
+        subject = item.get("subject", "")
+        subject_counts[subject] = subject_counts.get(subject, 0) + 1
+
+    most_common = max(subject_counts.items(), key=lambda x: x[1])[0]
+
+    if subject_counts[most_common] >= 3 and most_common in QUIZ_BANK:
+        print(f"\n🧠 Want to try a quick quiz on **{most_common}**? (yes/no)")
+        response = input("> ").lower()
+        if response in ["yes", "y"]:
+            run_quiz(most_common)
+
+def run_quiz(subject):
+    print(f"\n🎯 Starting quiz on {subject}!\n")
+    score = 0
+    for q in QUIZ_BANK[subject][:3]:
+        print(q["question"])
+        ans = input("Your answer: ").strip()
+        if ans == q["answer"]:
+            print("✅ Correct!\n")
+            score += 1
+        else:
+            print(f"❌ Nope. Correct answer: {q['answer']}\n")
+    print(f"🏁 Quiz complete! You got {score}/3 right.")
 
 
 
