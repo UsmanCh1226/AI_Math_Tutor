@@ -1,49 +1,38 @@
 from nlp_parser import parse_user_input
-from math_solver import solve_expression
-from user_history import UserHistory
-from question_generator import generate_question
+from math_engine import route_problem
+from user_history import save_user_query
 
-def chatbot():
-    print("🧠 MathBot: Ask me any math question (e.g. 'solve x² + 5 = 10')")
-    print("Type 'quit' to exit.\n")
 
-    history = UserHistory()
+def chatbot_response(user_input):
+    """
+    Processes user input and returns the AI tutor's response.
 
-    while True:
-        user_input = input("You: ")
+    Parameters:
+    -----------
+    user_input : str
+        The raw question entered by the user (e.g., "Solve 2x^2 + 3x + 1 = 0").
 
-        if user_input.lower() in ['quit', 'exit']:
-            print("👋 MathBot: Goodbye!")
-            break
+    Returns:
+    --------
+    str
+        The chatbot's answer.
+    """
 
-        # Step 1: Parse input (detect subject, expression, step-by-step mode)
-        parsed = parse_user_input(user_input)
+    parsed = parse_user_input(user_input)
 
-        # Step 2: Solve the math question using the correct subject solver
-        result = solve_expression(parsed)
+    save_user_query(user_input, parsed)
 
-        # Step 3: Show the result to the user
-        print(f"\n🧠 MathBot:\n{result}\n")
+    result = route_problem(parsed)
 
-        # Step 4: Add this interaction to the user's history
-        history.add(parsed)
-
-        # Step 5: Check if quiz should be suggested based on subject repetition
-        subject_to_quiz = history.should_suggest_quiz()
-        if subject_to_quiz:
-            print(f"📚 You've asked a lot of {subject_to_quiz} questions.")
-            print("Would you like to try a quick quiz on that topic? (yes/no)")
-
-            answer = input("> ").strip().lower()
-            if answer in ["yes", "y"]:
-                quiz_q = generate_question(subject_to_quiz)
-                print(f"\n🎯 Quiz time!\n{quiz_q['question']}")
-                user_ans = input("Your answer: ").strip()
-
-                if user_ans == quiz_q['answer']:
-                    print("✅ Correct!\n")
-                else:
-                    print(f"❌ Nope. The correct answer is: {quiz_q['answer']}\n")
+    return result
 
 if __name__ == "__main__":
-    chatbot()
+    print("🤖 AI Math Tutor is ready! Type 'quit' to exit.")
+    while True:
+        user_question = input("You: ")
+        if user_question.lower() in ["quit", "exit"]:
+            print("AI Tutor: Goodbye! Keep learning 📚")
+            break
+
+        answer = chatbot_response(user_question)
+        print(f"AI Tutor: {answer}")

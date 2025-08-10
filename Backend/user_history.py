@@ -1,39 +1,37 @@
-from collections import defaultdict
+"""
+user_history.py
+---------------
+Simple module to save and retrieve user queries.
+Stores history in a local text file (history.txt).
+"""
 
-class UserHistory:
-    def __init__(self):
-        self.history = []
+import json
+from datetime import datetime
 
-    def add(self, parsed_input):
-         self.history.append(parsed_input)
+HISTORY_FILE = "history.txt"
 
-    def most_frequent_subject(self):
-        counter = defaultdict(int)
+def save_user_query(raw_input, parsed):
+    """
+    Saves the user's raw input and parsed data to a history file.
+    """
+    entry = {
+        "timestamp": datetime.now().isoformat(),
+        "raw_input": raw_input,
+        "parsed": parsed
+    }
+    with open(HISTORY_FILE, "a") as f:
+        f.write(json.dumps(entry) + "\n")
 
-        for item in self.history:
-            subject = item.get("subject", 'Unknown')
-            counter[subject] += 1
-
-            if not counter:
-                return None
-
-            # Get the subject with the highest frequency
-            most_common = max(counter.items(), key=lambda x: x[1])[0]
-            return most_common
-
-        def should_suggest_quiz(self):
-            """
-            Determines whether a quiz should be suggested based on repeated subject use.
-
-            Returns:
-                str or None: The subject that should be quizzed (if seen 3+ times), or None.
-            """
-            subject = self.most_frequent_subject()
-            if not subject:
-                return None
-
-            count = sum(1 for item in self.history if item.get("subject") == subject)
-            if count >= 3:
-                return subject
-            return None
-
+def load_user_history():
+    """
+    Loads all saved user queries from the history file.
+    Returns a list of dictionaries.
+    """
+    history = []
+    try:
+        with open(HISTORY_FILE, "r") as f:
+            for line in f:
+                history.append(json.loads(line.strip()))
+    except FileNotFoundError:
+        pass  # No history file yet
+    return history

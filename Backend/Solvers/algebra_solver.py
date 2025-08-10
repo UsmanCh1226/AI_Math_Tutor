@@ -2,7 +2,7 @@ from sympy import symbols, Eq, solve, simplify, sympify
 from sympy.parsing.sympy_parser import parse_expr
 import re
 
-def solve_equation(expr_str, step_by_step=False, solve_for=None):
+def solve_algebra(expr_str, step_by_step=False, solve_for=None):
     """
     Solves an algebraic equation, supports multiple variables.
 
