@@ -1,68 +1,69 @@
 """
 geometry_solver.py
 ------------------
-Handles basic geometry problems like calculating area, perimeter, and volume
-for common shapes.
+Handles geometry-related math problems like area, perimeter, and volume.
 """
+
+import math
 
 
 def solve_geometry(parsed):
     """
-    Solves geometry problems based on the parsed input.
+    Solves geometry problems based on keywords and numeric values.
 
     Parameters:
-        parsed (dict):
-            {
-                "expression": "area of circle radius=5",
-                "step_by_step": True/False
-            }
+        parsed (dict): Contains 'expression' and 'step_by_step' flags.
 
     Returns:
-        str: Answer string (with explanation if step_by_step=True)
+        str: Answer or step-by-step explanation.
     """
-    expr = parsed.get("expression", "").lower()
-    step_mode = parsed.get("step_by_step", False)
 
+    expr = parsed["expression"]
+    step_mode = parsed.get("step_by_step", False)
     steps = []
 
-    # Circle area
-    if "area" in expr and "circle" in expr:
-        try:
-            # Extract radius value
-            radius_str = expr.split("radius=")[1]
-            radius = float(radius_str)
-            area = 3.14159 * radius ** 2
+    # Lowercase for easier keyword matching
+    expr_lower = expr.lower()
 
-            if not step_mode:
-                return f"Area of circle: {area:.2f} units²"
+    # Extract numbers from the expression
+    nums = [float(n) for n in expr_lower.split() if n.replace('.', '', 1).isdigit()]
 
-            steps.append("We are finding the area of a circle.")
-            steps.append(f"Formula: Area = π × r²")
-            steps.append(f"Radius r = {radius}")
-            steps.append(f"Calculation: π × {radius}² = {area:.2f}")
-            return "\n".join(steps)
+    # AREA & PERIMETER
+    if "circle" in expr_lower and "area" in expr_lower:
+        if len(nums) < 1:
+            return "Please provide the radius."
+        r = nums[0]
+        area = math.pi * r**2
+        if not step_mode:
+            return f"Area of the circle: {area:.2f}"
+        steps.append(f"Given radius r = {r}")
+        steps.append("Formula: Area = π * r²")
+        steps.append(f"Calculation: π * {r}² = {area:.2f}")
+        return "\n".join(steps)
 
-        except Exception as e:
-            return f"Error calculating circle area: {e}"
+    elif "circle" in expr_lower and "perimeter" in expr_lower or "circumference" in expr_lower:
+        if len(nums) < 1:
+            return "Please provide the radius."
+        r = nums[0]
+        perimeter = 2 * math.pi * r
+        if not step_mode:
+            return f"Circumference of the circle: {perimeter:.2f}"
+        steps.append(f"Given radius r = {r}")
+        steps.append("Formula: Circumference = 2 * π * r")
+        steps.append(f"Calculation: 2 * π * {r} = {perimeter:.2f}")
+        return "\n".join(steps)
 
-    # Rectangle area
-    elif "area" in expr and "rectangle" in expr:
-        try:
-            width = float(expr.split("width=")[1].split()[0])
-            height = float(expr.split("height=")[1])
-            area = width * height
+    # VOLUME
+    elif "sphere" in expr_lower and "volume" in expr_lower:
+        if len(nums) < 1:
+            return "Please provide the radius."
+        r = nums[0]
+        volume = (4/3) * math.pi * r**3
+        if not step_mode:
+            return f"Volume of the sphere: {volume:.2f}"
+        steps.append(f"Given radius r = {r}")
+        steps.append("Formula: Volume = 4/3 * π * r³")
+        steps.append(f"Calculation: 4/3 * π * {r}³ = {volume:.2f}")
+        return "\n".join(steps)
 
-            if not step_mode:
-                return f"Area of rectangle: {area:.2f} units²"
-
-            steps.append("We are finding the area of a rectangle.")
-            steps.append(f"Formula: Area = width × height")
-            steps.append(f"Width = {width}, Height = {height}")
-            steps.append(f"Calculation: {width} × {height} = {area:.2f}")
-            return "\n".join(steps)
-
-        except Exception as e:
-            return f"Error calculating rectangle area: {e}"
-
-    else:
-        return "Geometry solver currently supports: area of circle, area of rectangle."
+    return "Sorry, I don't yet know how to solve that geometry problem."

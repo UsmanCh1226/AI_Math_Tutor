@@ -1,73 +1,73 @@
 """
 stats_solver.py
 ---------------
-Handles basic statistics problems like mean, median, variance, and probability.
+Handles statistics problems like mean, median, mode, and standard deviation.
 """
 
-import statistics as stats
+import statistics
 
 
 def solve_statistics(parsed):
     """
-    Solves statistics problems based on the parsed input.
+    Solves basic statistics problems.
 
     Parameters:
-        parsed (dict):
-            {
-                "expression": "mean of 2,4,6,8",
-                "step_by_step": True/False
-            }
+        parsed (dict): Contains 'expression' and 'step_by_step' flags.
 
     Returns:
-        str: Answer string (with explanation if step_by_step=True)
+        str: Answer or step-by-step explanation.
     """
-    expr = parsed.get("expression", "").lower()
+
+    expr = parsed["expression"]
     step_mode = parsed.get("step_by_step", False)
     steps = []
 
-    try:
-        # Extract numbers
-        if "of" in expr:
-            numbers_str = expr.split("of")[1]
-        else:
-            numbers_str = expr
-        numbers = [float(x) for x in numbers_str.replace(",", " ").split() if x.strip()]
+    # Extract numbers from the expression
+    nums = [float(n) for n in expr.replace(",", " ").split() if n.replace('.', '', 1).isdigit()]
 
-        # Mean
-        if "mean" in expr:
-            mean_val = stats.mean(numbers)
-            if not step_mode:
-                return f"Mean: {mean_val:.2f}"
-            steps.append("We are calculating the mean (average).")
-            steps.append(f"Numbers: {numbers}")
-            steps.append(f"Formula: Mean = sum(numbers) / count")
-            steps.append(f"Calculation: {sum(numbers)} / {len(numbers)} = {mean_val:.2f}")
-            return "\n".join(steps)
+    if len(nums) == 0:
+        return "Please provide a set of numbers."
 
-        # Median
-        elif "median" in expr:
-            median_val = stats.median(numbers)
-            if not step_mode:
-                return f"Median: {median_val:.2f}"
-            steps.append("We are calculating the median (middle value).")
-            steps.append(f"Numbers: {numbers}")
-            steps.append("Sort the numbers, pick the middle (or average of two middle values).")
-            steps.append(f"Result: {median_val:.2f}")
-            return "\n".join(steps)
+    expr_lower = expr.lower()
 
-        # Variance
-        elif "variance" in expr:
-            variance_val = stats.variance(numbers)
-            if not step_mode:
-                return f"Variance: {variance_val:.2f}"
-            steps.append("We are calculating the variance.")
-            steps.append(f"Numbers: {numbers}")
-            steps.append("Formula: Variance = average of squared differences from the mean.")
-            steps.append(f"Result: {variance_val:.2f}")
-            return "\n".join(steps)
+    if "mean" in expr_lower or "average" in expr_lower:
+        mean_val = statistics.mean(nums)
+        if not step_mode:
+            return f"Mean: {mean_val:.2f}"
+        steps.append(f"Numbers: {nums}")
+        steps.append(f"Formula: Mean = sum(numbers) / count(numbers)")
+        steps.append(f"Calculation: {sum(nums)} / {len(nums)} = {mean_val:.2f}")
+        return "\n".join(steps)
 
-        else:
-            return "Supported stats operations: mean, median, variance."
+    elif "median" in expr_lower:
+        median_val = statistics.median(nums)
+        if not step_mode:
+            return f"Median: {median_val}"
+        steps.append(f"Numbers: {nums}")
+        steps.append("Median is the middle number when sorted.")
+        steps.append(f"Sorted list: {sorted(nums)}")
+        steps.append(f"Median = {median_val}")
+        return "\n".join(steps)
 
-    except Exception as e:
-        return f"Error processing statistics: {e}"
+    elif "mode" in expr_lower:
+        try:
+            mode_val = statistics.mode(nums)
+        except statistics.StatisticsError:
+            return "No unique mode found."
+        if not step_mode:
+            return f"Mode: {mode_val}"
+        steps.append(f"Numbers: {nums}")
+        steps.append("Mode is the most frequent number.")
+        steps.append(f"Mode = {mode_val}")
+        return "\n".join(steps)
+
+    elif "standard deviation" in expr_lower:
+        stdev_val = statistics.stdev(nums)
+        if not step_mode:
+            return f"Standard Deviation: {stdev_val:.2f}"
+        steps.append(f"Numbers: {nums}")
+        steps.append("Formula: sqrt(sum((x - mean)²) / (n-1))")
+        steps.append(f"Standard Deviation = {stdev_val:.2f}")
+        return "\n".join(steps)
+
+    return "Sorry, I can't solve that statistics problem yet."
