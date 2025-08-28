@@ -55,7 +55,7 @@ def _call_solver(step: dict, step_by_step: bool) -> str:
 
 
 def route_math_problem(parsed: dict) -> str:
- 
+
     step_by_step = parsed.get("step_by_step", False)
 
     # Pipeline path
